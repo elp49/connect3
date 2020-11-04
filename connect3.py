@@ -74,8 +74,8 @@ class State:
             self.put(x, y, c)
         return self
 
-    def equals(self, state):
-        return self.compact_string() == state.compact_string()
+    # def equals(self, state):
+    #     return self.compact_string() == state.compact_string()
 
     def actions(self, char):
         actions = []
