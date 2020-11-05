@@ -89,6 +89,16 @@ class State:
         self.drop(action.char, action.x)
         return self
 
+    def children(self, char):
+        children = []
+        actions = self.actions(char)
+        for a in actions:
+            clone = self.clone()
+            clone.execute(a)
+            children.append(clone)
+
+        return children
+
     def game_over(self):
         return self.winner() or self.num_empties() == 0
 
