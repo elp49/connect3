@@ -49,7 +49,7 @@ class MinimaxPlayer(Player):
         # Use minimax algorithm to evalutate best action.
         child_values = []
         for c in children:
-            child_values.append(self.minimax(c, 3, False, -math.inf, math.inf))
+            child_values.append(self.minimax(c, 12, False, -math.inf, math.inf))
 
         return actions[child_values.index(max(child_values))]
 
@@ -59,7 +59,7 @@ class MinimaxPlayer(Player):
 
         # Base Case: Test if max depth is reached or if the game is over.
         if depth == 0 or state.game_over():
-            return self.evaluate(state)
+            return self.evaluate(state, is_players_turn)
 
         # Get resulting states of each action on current state.
         children = state.children(self.char)
@@ -99,39 +99,43 @@ class MinimaxPlayer(Player):
 
             return min_val
 
-    def evaluate(self, state):
-        '''evaluate(state) -> evalutation value of state
-        The evaluation funtion that assigns a value to any final game states.'''
+    def evaluate(self, state, is_players_turn):
+        '''evaluate(state, is_players_turn) -> evalutation value of state
+        The evaluation funtion that assigns a value game states.'''
 
-        # TODO: Add depth to minimax return val?
-        # Note that it’s a good idea to also include diminishing returns for
-        # nodes deeper in the tree, thus giving higher values for nodes with
-        # shorter paths.
-
-        return self.winner(state)
-
-    def _winner_test(self, state, c, x, y, dx, dy):
         count = 0
-        for _ in range(state.connect - 1):
-            x += dx
-            y += dy
-            if state.get(x, y) == c:
-                count += 2
-            elif state.is_legal(x, y) and state.get(x, y) == Cell.EMPTY:
-                count += 1
-                break
-            else:
-                break
-
-        return count
-
-    def winner(self, state):
-        running_count = 0
         for x in range(state.max_x):
             for y in range(state.max_y):
                 c = state.get(x, y)
                 if c != Cell.EMPTY:
                     deltas = [(+1, 0), (0, +1), (+1, +1), (-1, +1)]
                     for dx, dy in deltas:
-                        running_count += state._winner_test(c, x, y, dx, dy)
-        return running_count
+                        count += self.get_state_val(state, is_players_turn, c, x, y, dx, dy)
+
+        return count
+
+
+    def get_state_val(self, state, is_players_turn, c, x, y, dx, dy):
+        val = 0
+        for _ in range(state.connect - 1):
+            x += dx
+            y += dy
+
+            # Get the next character.
+            next_c = state.get(x, y)
+
+            # Test if next character is same as the first char or is Empty.
+            if next_c == c or next_c == Cell.EMPTY:
+                # Test if character is this Player's.
+                if c == self.char:
+                    if is_players_turn:
+                        val += 1
+                    else:
+                        val -= 5
+                else:
+                    if is_players_turn:
+                        val -= 5
+                    else:
+                        val += 1
+
+        return val
